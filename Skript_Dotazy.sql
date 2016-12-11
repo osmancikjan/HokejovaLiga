@@ -96,6 +96,28 @@ LEFT JOIN Tymy t ON t.kod = r.domaci
 LEFT JOIN Tymy t1 ON t1.kod = r.hoste
 WHERE v.domaci_goly IS NULL AND v.hoste_goly IS NULL
 GROUP BY r.zID, t.nazev, v.domaci_goly, v.hoste_goly, t1.nazev 
-/*6;1;;*/
+/*6;1;4;Vypíše kód týmu, název, PSÈ a poèet hráèù, kteøí hrají v týmu.*/
+SELECT t.kod, t.nazev, t.psc, 
+/*Select vrací poèet hráèù v daném týmu*/
+	(
+		SELECT COUNT(c.tym) FROM Clenove c WHERE c.tym = t.kod
+	) AS pocet_hracu
+	FROM Tymy t 
+	WHERE t.kod LIKE 'FI%' OR t.kod LIKE 'SW%'
+/*6;2;4;Vypíše týmy a hráèe, kteøí jsou na hostování, tedy nebydlí ve stejném mìstì jako má klub sídlo.*/
+SELECT t.kod, t.nazev, t.psc,  
+/*Select vrací poèet hráèù v daném týmu, kteøí nebydlí ve stejném mìstì, kde má klub sídlo.*/
+	(
+		SELECT COUNT(c.tym) FROM Clenove c WHERE c.tym = t.kod 
+			/*Vrátí ID èlenù, kteøí nemají PSÈ stejné jako tým.*/
+			AND c.cID IN
+				(
+					SELECT cID FROM Clenove c 
+						JOIN Adresa a ON a.aID = c.aID
+						WHERE a.psc != t.psc 
+				)
+	) AS pocet_hracu
+	FROM Tymy t 
+	WHERE t.kod LIKE 'FI%' OR t.kod LIKE 'SW%'
 
-/*6;2;;*/
+
