@@ -31,21 +31,37 @@ SELECT c.jmeno, c.prijimeni FROM Clenove c
 /*2;2;6;Vypíše jména útoèníkù, kteøí jsou v tabulce statistika (tedy skórovali nebo mìli asistenci)*/
 SELECT c.cID, c.jmeno, c.prijimeni FROM Clenove c
 	JOIN Statistiky s ON s.cID  = c.cID
-	WHERE s.pozice LIKE('Ú')
-/*2;3;2;Vypíše obránce, kteøí buïto neskórovali nebo nepøihrávali*/
+	WHERE s.pozice LIKE 'Ú'
+/*2;3;1;Vypíše obránce, kteøí buïto neskórovali nebo nepøihrávali a jejich pøíjmení zaèíná na P*/
 SELECT c.jmeno, c.prijimeni, s.goly, s.asistence FROM Clenove c
 	JOIN Statistiky s ON s.cID = c.cID
-	WHERE s.pozice LIKE('O') AND (s.goly = 0 OR s.asistence = 0)
-/*2;4;;*/
+	WHERE s.pozice LIKE 'O' AND (s.goly = 0 OR s.asistence = 0) AND c.prijimeni LIKE 'p%'
+/*2;4;2;Vypíše zápasy, ve kterých byl souèin gólù domácího a hostujícího týmu alespoò 5*/
+SELECT v.domaci_goly, v.hoste_goly, v.prodlouzeni FROM Vysledky v 
+	WHERE v.domaci_goly * v.hoste_goly > 4
 
-/*3;1;;*/
-/*3;2;;*/
-/*3;3;;*/
-/*3;4;;*/
-
+/*3;1;11;Vypíše id hráèù, kteøí jsou ve statistice pomocí EXISTS*/
+SELECT cID FROM Clenove
+	WHERE EXISTS (SELECT cID FROM Statistiky WHERE Statistiky.cID = Clenove.cID)
+/*3;2;11;Vypíše id hráèù, kteøí jsou ve statistice pomocí INTERSECT*/
+SELECT cID FROM Clenove
+	INTERSECT
+SELECT cID FROM Statistiky
+/*3;3;11;Vypíše id hráèù, kteøí jsou ve statistice pomocí IN*/
+SELECT cID FROM Clenove
+	WHERE cID IN (SELECT cID FROM Statistiky WHERE Statistiky.cID = Clenove.cID)
+/*3;4;11;Vypíše id hráèù, kteøí jsou ve statistice pomocí EXCEPT*/
+SELECT cID FROM Clenove
+EXCEPT
+(SELECT cID FROM Clenove 
+	EXCEPT 
+	SELECT cID FROM Statistiky)
 /*4;1;;*/
+
 /*4;2;;*/
+
 /*4;3;;*/
+
 /*4;4;;*/
 
 /*5;1;;*/
